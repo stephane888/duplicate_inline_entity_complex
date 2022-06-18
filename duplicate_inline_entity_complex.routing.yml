@@ -1,0 +1,15 @@
+duplicate_inline_entity_complex.example:
+  path: '/duplicate-inline-entity-complex/example'
+  defaults:
+    _title: 'Example'
+    _controller: '\Drupal\duplicate_inline_entity_complex\Controller\DuplicateInlineEntityComplexController::build'
+  requirements:
+    _permission: 'access content'
+
+duplicate_inline_entity_complex.settings_form:
+  path: '/admin/config/system/duplicate-inline-entity-complex'
+  defaults:
+    _title: 'duplicate inline entity complex settings'
+    _form: 'Drupal\duplicate_inline_entity_complex\Form\SettingsForm'
+  requirements:
+    _permission: 'administer duplicate_inline_entity_complex configuration'

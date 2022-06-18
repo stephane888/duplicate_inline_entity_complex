@@ -1,0 +1,8 @@
+name: duplicate inline entity complex
+type: module
+description: permet de dupliquer le contenu lors de creation d&#039;une entity
+package: Custom
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - inline_entity_form

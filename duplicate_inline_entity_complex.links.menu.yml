@@ -1,0 +1,6 @@
+duplicate_inline_entity_complex.settings_form:
+  title: duplicate inline entity complex
+  description: Configure duplicate inline entity complex.
+  parent: system.admin_config_system
+  route_name: duplicate_inline_entity_complex.settings_form
+  weight: 10
