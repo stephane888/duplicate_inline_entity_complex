@@ -1,6 +1,7 @@
 <?php
 
 /**
+ *
  * @file
  * Primary module hooks for duplicate inline entity complex module.
  *
@@ -8,3 +9,174 @@
  * This file is no longer required in Drupal 8.
  * @see https://www.drupal.org/node/2217931
  */
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\node\Entity\Node;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function duplicate_inline_entity_complex_form_block_content_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // dump($form_id);
+}
+
+/**
+ * Alter the fields used to represent an entity in the IEF table.
+ *
+ * @param array $fields
+ *        The fields, keyed by field name.
+ * @param array $context
+ *        An array with the following keys:
+ *        - parent_entity_type: The type of the parent entity.
+ *        - parent_bundle: The bundle of the parent entity.
+ *        - field_name: The name of the reference field on which IEF is
+ *        operating.
+ *        - entity_type: The type of the referenced entities.
+ *        - allowed_bundles: Bundles allowed on the reference field.
+ *        
+ * @see \Drupal\inline_entity_form\InlineFormInterface::getTableFields()
+ */
+function duplicate_inline_entity_complex_inline_entity_form_table_fields_alter(array &$fields, array $context) {
+  if ($context['entity_type'] == 'block_content') {
+    $fields['id'] = [
+      'type' => 'field',
+      'label' => t('Id'),
+      'weight' => 101
+    ];
+    $fields['status'] = [
+      'type' => 'field',
+      'label' => t('status'),
+      'weight' => 101
+    ];
+  }
+}
+
+/**
+ * implement hook_entity_bundle_field_info
+ *
+ * @param EntityTypeInterface $entity_type
+ */
+function duplicate_inline_entity_complex_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+  if ($entity_type->id() == 'block_content') {
+    // dump($bundle);
+    if (!empty($base_field_definitions['status'])) {
+      $fields['status'] = $base_field_definitions['status'];
+      $fields['status']->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+        'settings' => [
+          'display_label' => TRUE
+        ],
+        'weight' => 0
+      ])->setDisplayConfigurable('form', TRUE);
+    }
+  }
+  return $fields;
+}
+
+/**
+ * implement hook_field_widget_multivalue_WIDGET_TYPE_form_alter
+ */
+function duplicate_inline_entity_complex_field_widget_creationsitevirtuelcomplexinline_form_alter(&$element, \Drupal\Core\Form\FormStateInterface $form_state, $context) {
+  
+  /**
+   *
+   * @var \Drupal\Core\Field\FieldItemListInterface $items
+   */
+  $items = $context['items'];
+  
+  // On n'essaie de faire des copie de contenus.
+  if ($items->getEntity()->isNew()) {
+    
+    /**
+     *
+     * @var \Drupal\duplicate_inline_entity_complex\Plugin\Field\FieldWidget\CreationSiteVirtuelComplexInline $widget
+     */
+    $widget = $context['widget'];
+    $ief_id = $widget->_getIefId();
+    $entities = $form_state->get([
+      'inline_entity_form',
+      $ief_id,
+      'entities'
+    ]);
+    
+    // uniquement lors de la creation d'un contenu, on duplique les contenus
+    // definies par defaut.
+    if (!$form_state->get('default_value_widget')) {
+      
+      if (!empty($entities)) {
+        // on met à jour les données present dans $form_state.
+        foreach ($entities as $k => $entity) {
+          /**
+           *
+           * @var \Drupal\node\Entity\Node $cloneNode
+           */
+          $cloneNode = $entity['entity']->createDuplicate();
+          /**
+           * On active le contenu s'il possede un champs status.
+           */
+          if ($cloneNode->hasField('status')) {
+            $cloneNode->set('status', true);
+          }
+          $entities[$k]['needs_save'] = true;
+          $entities[$k]['form'] = null;
+          $entities[$k]['entity'] = $cloneNode;
+        }
+        //
+        $form_state->set([
+          'inline_entity_form',
+          $ief_id,
+          'entities'
+        ], $entities);
+        // On met à jour les données present dans le bloc d'affichage.
+        foreach ($element['entities'] as $k => $entity) {
+          if (!empty($entity['#entity'])) {
+            /**
+             *
+             * @var \Drupal\node\Entity\Node $node
+             */
+            $node = $element['entities'][$k]['#entity'];
+            $cloneNode = $node->createDuplicate();
+            /**
+             * On active le contenu s'il possede un champs status.
+             */
+            if ($cloneNode->hasField('status')) {
+              $cloneNode->set('status', true);
+            }
+            $element['entities'][$k]['#entity'] = $cloneNode;
+            $element['entities'][$k]['#needs_save'] = true;
+          }
+        }
+      }
+      else {
+        $message = "Aucun contenu par defaut pour le champs : " . $items->getName();
+        \Drupal::messenger()->addStatus($message);
+      }
+    }
+    // $form_values = NestedArray::getValue($form_state->getValues(),
+    // $reference_form['#parents']);
+  }
+  else {
+    // $widget = $context['widget'];
+    // $ief_id = $widget->_getIefId();
+    // $entities = $form_state->get([
+    // 'inline_entity_form',
+    // $ief_id,
+    // 'entities'
+    // ]);
+    // // dump($entities);
+    // foreach ($entities as $vals) {
+    // foreach ($vals as $entity) {
+    // /**
+    // *
+    // * @var \Drupal\block_content\Entity\BlockContent $entity
+    // */
+    // if ($entity instanceof Drupal\block_content\Entity\BlockContent &&
+    // $entity->getEntityTypeId() == 'block_content') {
+    // dump($entity->get('field_domain_access')->getValue());
+    // }
+    // }
+    // }
+  }
+}
