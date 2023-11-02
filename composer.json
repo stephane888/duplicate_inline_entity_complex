@@ -11,6 +11,6 @@
     ],
     "minimum-stability": "dev",
      "require": {
-    	"drupal/inline_entity_form": "^1.0@RC"
+    	"drupal/inline_entity_form": "^1.0@RC|^2"
    }
 }
