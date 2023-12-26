@@ -1,16 +1,16 @@
 {
-    "name": "stephane888/duplicate_inline_entity_complex",
-    "description": "permet de dupliquer les entites definit comme example.",
-    "type": "drupal-module-custom",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "stephane888",
-            "email": "kksasteph888@gmail.com"
-        }
-    ],
-    "minimum-stability": "dev",
-     "require": {
-    	"drupal/inline_entity_form": "^1.0@RC|^2"
-   }
+  "name": "stephane888/duplicate_inline_entity_complex",
+  "description": "permet de dupliquer les entites definit comme example.",
+  "type": "drupal-custom-module",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "stephane888",
+      "email": "kksasteph888@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "drupal/inline_entity_form": "^1.0@RC|^2"
+  }
 }
